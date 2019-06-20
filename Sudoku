@@ -1,0 +1,220 @@
+import java.util.*;
+import java.io.*;
+/**
+ * Creates a sudoku game with options make a 
+ * solvable sudoku, and a solver for a sudoku.
+ * 
+ * @author Maria Vazhaeparambil
+ * @version May 2, 2018
+ */
+public class Sudoku
+{
+    /**
+     * Creates a sudoku game.
+     * 
+     * @param args array with information that may be passed at start of processing
+     */
+    public static void main (String[] args) throws IOException
+    {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Would you like to play a game of sudoku or use the solver?");
+        String ans = (in.nextLine()).toLowerCase();
+        assessAns(ans, in);
+        System.out.println("Game ended.");
+        
+    }
+    
+    /**
+     * Assesses whether the user wants to play a game or use the solver.
+     * 
+     * @param ans the answer the user gave
+     * @param in  the scanner used to scan the user's input
+     */
+    public static void assessAns(String ans, Scanner in)
+    {
+        if(ans.equals("play a game"))
+            playAGame(in);
+        else if(ans.equals("use the solver"))
+        {
+            Sudoku2 solver = new Sudoku2();
+            solver.use();
+        }
+        else if(!ans.equals("-1"))
+        {
+            System.out.println("Please print either 'play a game' or 'use the solver'.");
+            System.out.println("Print '-1' to exit.");
+            System.out.println("Would you like to play a game of sudoku or use the solver?");
+            ans = in.nextLine();
+            assessAns(ans,in); 
+        }
+        
+    }
+    
+    /**
+     * Plays a game of sudoku.
+     * 
+     * @param in  the scanner used to scan the user's input
+     */
+    public static void playAGame(Scanner in)
+    {
+        Board sudoku = new Board();
+        sudoku.create();
+        
+        System.out.println("What level of difficulty would you like \n" + 
+                             "(Easy: 1 or Hard: 2 or End Game: 3)?");  
+        String lvl = in.nextLine();
+        
+        while(!lvl.equals("3"))
+        {
+            assess(sudoku, in, lvl);
+            System.out.println("What level of difficulty would you like \n" + 
+                             "(Easy: 1 or Hard: 2 or End Game: 3)?");
+            lvl = in.nextLine();
+            sudoku.squareInit();
+            sudoku.create(); 
+        }
+    }
+    
+
+    /**
+     * Assesses the input of the user.
+     * 
+     * @param sudoku the sudoku created for the user
+     * @param in     the scanner used to scan the user's input
+     * @param lvl    the difficulty level that the user wants
+     */
+    public static void assess(Board sudoku, Scanner in, String lvl)
+    {
+        Board template = new Board();
+        for(int r = 0; r < 9; r++)
+        {
+            for(int c = 0; c < 9; c++)
+            {
+                template.getSquare()[r][c].setValue(sudoku.getSquare()[r][c].getValue());
+            }
+        }
+        if(!(lvl.equals("1") || lvl.equals("2")))
+        {
+            System.out.println("\nPlease type either 1, 2, or 3" + 
+                                "(no spaces or other symbols)\n");     
+        }
+        else
+        {
+            if(lvl.equals("1"))
+            {
+                sudoku.hardE();
+            }
+            else
+            {
+                sudoku.hard(); 
+            }
+            Board copy = new Board();
+            for(int r = 0; r < 9; r++)
+            {
+                for(int c = 0; c < 9; c++)
+                {
+                    copy.getSquare()[r][c].setValue(sudoku.getSquare()[r][c].getValue());
+                }
+            }
+            sudoku.print();
+            numberInput(sudoku, in, copy, template);
+        }
+    }
+    
+    /**
+     * Continues playing the game after numbers are deleted from the sudoku. 
+     * 
+     * @param sudoku   the sudoku the user is trying to solve
+     * @param in       the scanner used to scan the user's input
+     * @param check    the sudoku created for the user with numbers missing
+     * @param template the solved sudoku
+     */
+    public static void numberInput(Board sudoku, Scanner in, Board check, Board template)
+    {
+        int r = 1; 
+        int c = 1; 
+        int v = 1;
+        String ans = "";
+        while(r >= 0 && r < 9 && c >= 0 && c < 9 && v > 0 && v <= 9)
+        {
+            System.out.println("Would you like to input a number?");
+            ans = in.nextLine();
+            if(ans.equals("yes"))
+            {
+                System.out.println("Which row would you like to input your number?");
+                r = numberEval(in.nextLine());
+                System.out.println("Which column would you like to input your number?");
+                c = numberEval(in.nextLine());
+                System.out.println("What value is your new number?");
+                v = numberEval(in.nextLine());
+                
+                if(r == -1 || c == -1)
+                    System.out.println("That is not a valid position.");
+                else if(v == -1)
+                    System.out.println("That is not a valid value.");
+                else if(check.getSquare()[r - 1][c - 1].getValue() != 0 )
+                {
+                    System.out.println("You can not change that value.");
+                }
+                
+                else if(template.getSquare()[r - 1][c - 1].getValue() != v)
+                {
+                    System.out.println("That is not the correct value.");
+                }
+                else 
+                {
+                    sudoku.updateSections(r - 1, c - 1, v);
+                    sudoku.print();
+                }
+            }
+            else if(!ans.equals("no"))
+            {
+                System.out.println("Please print 'yes' or 'no.'");
+            }
+            if(sudoku.see0())
+            {
+                System.out.println("Game solved.");
+                r = -1; 
+            }
+            else
+            {
+                r = 1;
+                c = 1;
+                v = 1;
+            }
+            if(ans.equals("no"))
+                r = -1;
+        }
+    }
+
+    /**
+     * Evaluates a String that the user inputted to check if it is a number or not.
+     * 
+     * @param check the String which the user inputted
+     * 
+     * @return the number that the user inputted between 1 and 9, otherwise 0
+     */
+    public static int numberEval(String check)
+    {
+        if (check.equals("1"))
+            return 1;
+        else if (check.equals("2"))
+            return 2;
+        else if (check.equals("3"))
+            return 3;
+        else if (check.equals("4"))
+            return 4;
+        else if (check.equals("5"))
+            return 5;
+        else if (check.equals("6"))
+            return 6;
+        else if (check.equals("7"))
+            return 7;
+        else if (check.equals("8"))
+            return 8;
+        else if (check.equals("9"))
+            return 9;
+        else 
+            return -1;
+    }
+}
