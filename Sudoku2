@@ -1,0 +1,74 @@
+import java.util.*;
+import java.io.*;
+/**
+ * A class that asks the user for a Sudoku that will be solved.
+ * 
+ * @author Maria Vazhaeparambil
+ * @version May 31, 2018
+ */
+public class Sudoku2
+{
+    /**
+     * Helps the user use the sudoku solver.
+     */
+    public static void use()
+    {
+        Board sudoku = new Board();
+        Scanner in = new Scanner(System.in);
+        
+        System.out.println("Please print the number of your sudoku in order with " +
+                            "spaces in between using 0 for an empty square.");
+        boolean check = true;
+        for(int row = 0; row < 9; row++)
+        {
+            for(int col = 0; col < 9; col++)
+            {
+                int curr = in.nextInt();
+                sudoku.updateSections(row, col, curr);
+            }
+        }
+        sudoku.solved();
+        sudoku.print();
+        
+        for(int row = 0; row < 9; row++)
+        {
+            for(int col = 0; col < 9; col++)
+            {
+                if(sudoku.getSquare()[row][col].getValue() == 0)
+                    System.out.println(row + " "  + col + " " + 
+                        sudoku.getSquare()[row][col].returnPossible());
+            }
+        }
+    }
+
+    /**
+     * Evaluates a String that the user inputted to check if it is a number or not.
+     * 
+     * @param check the String which the user inputted
+     * 
+     * @return the number that the user inputted between 1 and 9, otherwise 0
+     */
+    public static int numberEval(String check)
+    {
+        if (check.equals("1"))
+            return 1;
+        else if (check.equals("2"))
+            return 2;
+        else if (check.equals("3"))
+            return 3;
+        else if (check.equals("4"))
+            return 4;
+        else if (check.equals("5"))
+            return 5;
+        else if (check.equals("6"))
+            return 6;
+        else if (check.equals("7"))
+            return 7;
+        else if (check.equals("8"))
+            return 8;
+        else if (check.equals("9"))
+            return 9;
+        else 
+            return -1;
+    }
+}
